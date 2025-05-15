@@ -19,7 +19,7 @@ const FUNCTION = 'head_height';
 const STATE_FILE_PATH = path.join(__dirname, 'monitor_state.json');
 
 const ALERT_THRESHOLDS_MINUTES = {
-    min20: 5,
+    min20: 20,
     min30: 30,
     min60: 60,
 };
