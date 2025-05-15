@@ -1,0 +1,9 @@
+{
+  "lastKnownHeight": 0,
+  "lastUpdatedAt": 0,
+  "alertsSent": {
+    "min20": false,
+    "min30": false,
+    "min60": false
+  }
+}
