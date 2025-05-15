@@ -1,0 +1,22 @@
+{
+  "name": "move-spv-tg-monitor",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@mysten/bcs": "^1.6.1",
+    "@mysten/sui": "^1.29.1",
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0"
+  }
+}
