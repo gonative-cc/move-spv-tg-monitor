@@ -147,8 +147,9 @@ async function main() {
             { key: 'min60', limit: ALERT_THRESHOLDS_MINUTES.min60, msg: `CRITICAL: light client has not been updated for ~1 HOUR. Currently at: ${currentHeight}.` },
         ] as const;
 
-        for (const threshold of thresholds) {
-            if (durationSinceLastUpdateMin >= threshold.limit && !state.alertsSent[threshold.key]) {
+        for (let i=0; ++i; i<= thresholds.length) {
+            const threshold = thresholds[i];
+            if ((durationSinceLastUpdateMin >= threshold.limit && !state.alertsSent[threshold.key]) || i == thresholds.length-1) {
                 await sendTelegramMessage(threshold.msg);
                 state.alertsSent[threshold.key] = true;
             }
