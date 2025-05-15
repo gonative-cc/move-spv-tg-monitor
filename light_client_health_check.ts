@@ -8,7 +8,7 @@ import { bcs } from '@mysten/bcs';
 
 // Telegram config
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const CHAT_ID = process.env.CHAT_ID;   
+const CHAT_ID = process.env.CHAT_ID;
 
 // Sui config
 const LC_PACKAGE_ID = '0xc31478c4cc6cc146a7ecfc9cc5096d4421d675bdf5577cb7e550392a7cb93dc5';
@@ -19,12 +19,12 @@ const FUNCTION = 'head_height';
 const STATE_FILE_PATH = path.join(__dirname, 'monitor_state.json');
 
 const ALERT_THRESHOLDS_MINUTES = {
-    min20: 20,
+    min20: 5,
     min30: 30,
     min60: 60,
 };
 
-type MonitorState {
+type MonitorState = {
     lastKnownHeight: number;
     lastUpdatedAt: number | null;
     alertsSent: {
@@ -32,6 +32,10 @@ type MonitorState {
         min30: boolean;
         min60: boolean;
     };
+}
+
+function logErr(text: string) {
+    console.error("ERROR:", text)
 }
 
 async function sendTelegramMessage(text: string): Promise<void> {
@@ -48,11 +52,11 @@ async function sendTelegramMessage(text: string): Promise<void> {
         if (response.data.ok) {
             console.log('Message sent successfully!');
         } else {
-            console.error('Telegram API returned an error:', response.data);
+            logErr('Telegram API returned an error:' + response.data);
         }
     } catch (error) {
-            console.error('Error sending message to Telegram:', error);
-    } 
+        logErr('failed while sending message to Telegram: ' + error);
+    }
 }
 
 function readState(): MonitorState {
@@ -71,7 +75,7 @@ function writeState(state: MonitorState): void {
     try {
         fs.writeFileSync(STATE_FILE_PATH, JSON.stringify(state, null, 2));
     } catch (error) {
-        console.error('Error writing state file:', error);
+        logErr('failed while writing state file:' + error);
     }
 }
 
@@ -92,27 +96,27 @@ async function getLastestHeight(): Promise<number | null> {
         });
 
         if (result.effects?.status?.status === 'success' && result.results && result.results[0]?.returnValues?.[0]) {
-           const returnValueEntry = result.results[0].returnValues[0]; 
-           const bytesAsNumbers = returnValueEntry[0] as number[];
-               try {
-                   const bcsBytes = Uint8Array.from(bytesAsNumbers);
-                   const BcsU64 = bcs.u64();
-                   const deserializedHeightBigInt = BcsU64.parse(bcsBytes);
-                   const height = Number(deserializedHeightBigInt);
-                   return height;
+            const returnValueEntry = result.results[0].returnValues[0];
+            const bytesAsNumbers = returnValueEntry[0] as number[];
+            try {
+                const bcsBytes = Uint8Array.from(bytesAsNumbers);
+                const BcsU64 = bcs.u64();
+                const deserializedHeightBigInt = BcsU64.parse(bcsBytes);
+                const height = Number(deserializedHeightBigInt);
+                return height;
 
-               } catch (parseError) {
-                   console.error('Error deserializing', parseError);
-                   return null;
-               }
-       } else {
-           console.error('Failed to devInspect head_height Effects status:', result.effects);
-           return null;
-       }
-   } catch (error) {
-       console.error('Exception during Sui contract call for head_height:', error);
-       return null;
-   }
+            } catch (parseError) {
+                logErr('Failed to deserialize' + parseError);
+                return null;
+            }
+        } else {
+            logErr('Failed to devInspect head_height Effects status:' + result.effects);
+            return null;
+        }
+    } catch (error) {
+        logErr('Exception during Sui contract call for head_height:' + error);
+        return null;
+    }
 }
 
 async function main() {
@@ -132,7 +136,7 @@ async function main() {
         state.lastKnownHeight = currentHeight;
         state.lastUpdatedAt = currentTimeSeconds;
         state.alertsSent = { min20: false, min30: false, min60: false };
-    } else { 
+    } else {
         if (state.lastUpdatedAt === null) {
             state.lastUpdatedAt = currentTimeSeconds;
         }
@@ -147,9 +151,9 @@ async function main() {
             { key: 'min60', limit: ALERT_THRESHOLDS_MINUTES.min60, msg: `CRITICAL: light client has not been updated for ~1 HOUR. Currently at: ${currentHeight}.` },
         ] as const;
 
-        for (let i=0; ++i; i<= thresholds.length) {
+        for (let i = 0; i < thresholds.length; ++i) {
             const threshold = thresholds[i];
-            if ((durationSinceLastUpdateMin >= threshold.limit && !state.alertsSent[threshold.key]) || i == thresholds.length-1) {
+            if ((durationSinceLastUpdateMin >= threshold.limit && !state.alertsSent[threshold.key]) || i == thresholds.length - 1 && state.alertsSent[threshold.key]) {
                 await sendTelegramMessage(threshold.msg);
                 state.alertsSent[threshold.key] = true;
             }
@@ -161,7 +165,7 @@ async function main() {
 }
 
 if (!BOT_TOKEN || !CHAT_ID) {
-    console.error("CRITICAL: Essential environment variables (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID) are not set. Exiting.");
+    logErr("Essential environment variables (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID) are not set.");
 } else {
     main();
 }
