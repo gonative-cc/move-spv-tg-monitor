@@ -16,12 +16,12 @@ A simple monitoring script for a Bitcoin SPV Light Client running on the Sui net
     npm install
     ```
 
-3.  Create a Telegram Bot and Get Channel/Chat ID:**
+3.  Create a Telegram Bot and Get Channel/Chat ID:
     - To create a Bot follow https://core.telegram.org/bots#creating-a-new-bot. Save the `BOT_TOKEN`.
     - Get Channel ID:
         1.  Create a new Telegram Channel.
         2.  Add your newly created bot as an administrator to this channel with permission to "Post messages."
-        3.  Obtain the Channel ID (eg. @LIGHT_CLIENT_ALERTS_BOT)
+        3.  Obtain the Channel ID (eg. `@LIGHT_CLIENT_ALERTS_BOT`)
 
 4.  Create and Configure `.env` File:
     Create a `.env` file in the root of the project (`move-spv-tg-monitor/.env`). Add the following content, replacing the placeholder values with your actual data:

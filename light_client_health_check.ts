@@ -24,7 +24,7 @@ const ALERT_THRESHOLDS_MINUTES = {
     min60: 60,
 };
 
-interface MonitorState {
+type MonitorState {
     lastKnownHeight: number;
     lastUpdatedAt: number | null;
     alertsSent: {
